@@ -1,0 +1,35 @@
+pip install openai requests
+import openai
+import requests
+
+# Replace 'YOUR_API_KEY' with your actual Gemini API key
+openai.api_key = 'YOUR_API_KEY'
+
+def upload_document(file_path):
+    with open(file_path, 'rb') as f:
+        response = openai.File.create(
+            file=f,
+            purpose='completion'
+        )
+    return response['id']
+
+def ask_query(document_id, query):
+    response = openai.Completion.create(
+        engine='text-davinci-003',  # Adjust the engine as needed
+        prompt=f"**Document:** {document_id}\n**Query:** {query}\n**Answer:**",
+        temperature=0.7,
+        max_tokens=1024
+    )
+    return response['choices'][0]['text'].strip()
+
+if __name__ == '__main__':
+    file_path = 'your_document.pdf'  # Replace with the path to your PDF file
+    document_id = upload_document(file_path)
+    print("Document ID:", document_id)
+
+    while True:
+        query = input("Enter your query (or 'quit' to exit): ")
+        if query.lower() == 'quit':
+            break
+        response = ask_query(document_id, query)
+        print("Response:", response)
